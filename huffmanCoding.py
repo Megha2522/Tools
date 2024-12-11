@@ -1,3 +1,8 @@
+from tkinter import *
+from tkinter.ttk import *
+from tkinter import scrolledtext
+from tkinter import messagebox
+from tkinter import filedialog
 import heapq , os
 
 class binaryTree:
@@ -14,10 +19,9 @@ class binaryTree:
     def __eq__(self,other):
         return self.freq == other.freq
 
-class huffmanCode:
+class HuffmanAlgorithm:
 
-    def __init__(self,path):
-        self.path = path
+    def __init__(self):
         self.heap = []
         self.code = {} #dict to store binary code of char
         self.reverse_code = {} #dict to store binary code of char in reverse form
@@ -84,8 +88,8 @@ class huffmanCode:
             array.append(int(byte,2))
         return array
     
-    def get_file_size(self):
-        file_size = os.path.getsize(path)
+    def get_file_size(self, filePath):
+        file_size = os.path.getsize(filePath)
         if file_size < 1024:
             return f"{file_size} bytes"
         elif file_size < 1024**2:
@@ -95,15 +99,15 @@ class huffmanCode:
         else:
             return f"{file_size / 1024**3:.2f} GB"
 
-    def compression(self):
+    def compression(self, path):
  
-        fileSize = self.get_file_size()
+        fileSize = self.get_file_size(path)
         print('Reading file ' + path + ' with file size: ', fileSize)
         # To access the file and get text of the file
-        filename,file_extension = os.path.splitext(self.path)
+        filename,file_extension = os.path.splitext(path)
         output_path = filename + '.bin'
 
-        with open(self.path , 'r+') as file , open(output_path,'wb') as output:
+        with open(path , 'r+') as file , open(output_path,'wb') as output:
 
             text = file.read()
             text = text.rstrip()
@@ -167,7 +171,53 @@ class huffmanCode:
             output.write(actual_text)
         return output_path
     
-path = '.\input.txt' #input("Enter the path of file : ")
-h = huffmanCode(path)
-compressesd_file = h.compression()
-h.decompress(compressesd_file)
+# path = '.\input.txt' #input("Enter the path of file : ")
+# h = HuffmanAlgorithm(path)
+# compressesd_file = h.compression()
+# h.decompress(compressesd_file)
+
+# making main window
+window = Tk() 
+window.title("HuffMan Compression/De-Compression")
+window.config(background="teal")
+
+# widgets
+topFrame=Frame(window)
+topFrame.pack()
+bottomFrame=Frame(window)
+bottomFrame.pack()
+heading=Label(topFrame,text="HUFFMAN", background="black",foreground="white",font=("Arial Bold", 50))
+heading.pack(fill=X)
+
+COMPRESSION = "Compression"
+DE_COMPRESSION = "DeCompression"
+
+operationSelector = Combobox(bottomFrame,width=25,font=("Arial Bold", 15))
+operationSelector['values']= ("Select a Property...", COMPRESSION, DE_COMPRESSION)
+operationSelector.current(0) #set default property to first element in list of values 
+operationSelector.grid(column=6, row=1,columnspan=5,pady=10)
+
+def open_file():
+    file_path = filedialog.askopenfilename(title="Select a file")  # Opens the file selection dialog
+    selectedOperation = operationSelector.get()
+    if file_path:
+        print(f"Selected file: {file_path}")
+        print(f"Selected operation: {selectedOperation}")
+        huffmanAlgorithm = HuffmanAlgorithm()
+        if selectedOperation == COMPRESSION:
+            huffmanAlgorithm.compression(file_path)
+        elif selectedOperation == DE_COMPRESSION:
+            huffmanAlgorithm.decompress(file_path)
+        else:
+            messagebox.showerror("Error", f"Please select operation from dropdown!")
+            return
+        # Show dialog box, compression/Decompression completed & close the main window
+        messagebox.showinfo("Information", f"{selectedOperation} successful!s")
+        exit()
+
+convert_button=Button(bottomFrame,text="Select File",command=open_file,width=23)
+convert_button.grid(column=6, row=4,columnspan=5,pady=10)
+
+# mainloop
+window.mainloop()
+
